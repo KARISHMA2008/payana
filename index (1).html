@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Payana: plan a trip anywhere in India</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#edf0f2;--paper:#fbfbf9;--ink:#16202b;--mute:#5d6a76;--line:#cfd6dc;--sign:#f4b81c;--grn:#2e7d5b;--rain:#7e9bb5;--sans:'Archivo',system-ui,sans-serif;--serif:'Source Serif 4',Georgia,serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--serif)}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+header{background:var(--ink);color:#fff;padding:18px 0 22px}
+header h1{font:800 28px/1 var(--sans);margin:0}
+header p{margin:6px 0 0;color:#b8c3ce;font-size:15px}
+form{display:grid;grid-template-columns:1.3fr 1.3fr .6fr .8fr;gap:12px;margin:18px 0 0}
+label{font:500 13px var(--sans);color:#b8c3ce;display:block;margin-bottom:4px}
+input,select{width:100%;font:16px var(--serif);padding:9px 10px;border:2px solid transparent;border-radius:3px;background:#fff;color:var(--ink)}
+input:focus-visible,select:focus-visible,button:focus-visible,tr[tabindex]:focus-visible{outline:3px solid var(--sign);outline-offset:1px}
+main{padding:28px 0 40px}
+h2,h3{font-family:var(--sans)}
+h3{font-size:22px;margin:40px 0 12px;font-weight:800}
+.board{background:var(--sign);color:#111;border:6px solid #111;border-radius:4px;padding:22px 26px;box-shadow:0 0 0 3px var(--sign)}
+.board h2{font:800 clamp(38px,9vw,72px)/1 var(--sans);margin:0}
+.board p{margin:8px 0 0;font:500 17px var(--sans)}
+.board .from{font-size:15px;margin:0 0 6px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;margin-top:22px;border-left:4px solid var(--ink)}
+.facts div{padding:2px 16px}
+.facts b{display:block;font:500 14px var(--sans);color:var(--mute)}
+.tw{overflow-x:auto;background:var(--paper);border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 14px var(--sans);color:var(--mute)}
+tr:last-child td{border:0}
+.tag{display:inline-block;font:500 12px var(--sans);background:var(--ink);color:#fff;padding:1px 7px;border-radius:2px;margin-left:6px}
+.note{color:var(--mute);font-size:15px;margin:10px 0 0}
+.list{display:grid;gap:0;background:var(--paper);border:1px solid var(--line)}
+.row{display:grid;grid-template-columns:1fr auto;gap:4px 16px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.row b{font-family:var(--sans)}
+.row span{color:var(--mute);font-size:15px}
+.row .r{text-align:right;font-family:var(--sans);font-size:15px}
+button.row{width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;border-bottom:1px solid var(--line);cursor:pointer}
+button.row:hover{background:#fff}
+.v{display:inline-block;width:12px;height:12px;border:1.5px solid var(--grn);margin-right:7px;position:relative;vertical-align:-1px}
+.v:after{content:"";position:absolute;inset:2px;border-radius:50%;background:var(--grn)}
+.v.n{border-color:#b3261e}.v.n:after{background:#b3261e}
+.day{display:grid;grid-template-columns:90px 1fr;gap:12px;padding:14px;border-bottom:1px solid var(--line);background:var(--paper)}
+.day:last-child{border:0}
+.day h4{margin:0;font:800 17px var(--sans)}
+.day p{margin:0 0 4px}
+svg{width:100%;height:auto;display:block;background:var(--paper);border:1px solid var(--line)}
+svg text{font:11px var(--sans);fill:var(--mute)}
+.bar{display:flex;height:26px;margin:6px 0 10px;border:1px solid var(--ink)}
+.bar i{display:block}
+.key{display:flex;flex-wrap:wrap;gap:6px 18px;font:500 14px var(--sans)}
+.key s{display:inline-block;width:11px;height:11px;margin-right:6px;text-decoration:none}
+.total{font:800 34px var(--sans);margin:10px 0 0}
+.empty{padding:40px 0;color:var(--mute)}
+footer{border-top:1px solid var(--line);padding:18px 0 40px;color:var(--mute);font-size:14px}
+@media(max-width:640px){form{grid-template-columns:1fr 1fr}.day{grid-template-columns:1fr}.board{padding:16px}}
+@media(prefers-reduced-motion:no-preference){.board{animation:drop .5s ease-out}@keyframes drop{from{transform:translateY(-10px);opacity:0}}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>Payana</h1>
+<p>Pick where you are and where you want to go. Get travel times, fares, weather and a plan.</p>
+<form id="f" onsubmit="return false">
+<div><label for="from">Starting from</label><input id="from" list="cities" placeholder="Type a city" autocomplete="off"></div>
+<div><label for="to">Going to</label><select id="to"></select></div>
+<div><label for="days">Days</label><input id="days" type="number" min="1" max="14" value="3"></div>
+<div><label for="tier">Stay</label><select id="tier"><option value="0">Budget</option><option value="1" selected>Mid-range</option><option value="2">Luxury</option></select></div>
+</form>
+<datalist id="cities"></datalist>
+</div></header>
+<main class="wrap" id="out" aria-live="polite"></main>
+<footer><div class="wrap">Distances are straight-line from city coordinates, then scaled for real routes. Times and fares are planning estimates, not live data. Entry fees are for Indian nationals. Check IRCTC, airline sites and the venue before you book.</div></footer>
+
+<script>
+const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const SLOT={Morning:0,Afternoon:1,Evening:2};
+/* c: [lat,lng]. Places with d/best/t/r/pl/fd are destinations; the rest are start points only.
+   d: [min,recommended] days  best: month indexes  t: avg daily high C  r: rainfall mm
+   pl: [name,time,fee,slot]  fd: [dish,where,price,veg]  s: stay per night [budget,mid,luxury]
+   hill: slower roads  nt: no railway  nf: no usable airport  i: island  ex/fx: extra minutes by train/air */
+const P={
+Delhi:{c:[28.61,77.21]},Mumbai:{c:[19.08,72.88]},Bengaluru:{c:[12.97,77.59]},Chennai:{c:[13.08,80.27]},Kolkata:{c:[22.57,88.36]},Hyderabad:{c:[17.39,78.49]},Pune:{c:[18.52,73.86]},Ahmedabad:{c:[23.02,72.57]},Lucknow:{c:[26.85,80.95]},Kochi:{c:[9.93,76.27]},Chandigarh:{c:[30.73,76.78]},Bhopal:{c:[23.26,77.41]},Patna:{c:[25.59,85.14]},Guwahati:{c:[26.14,91.74]},Bhubaneswar:{c:[20.3,85.82]},Nagpur:{c:[21.15,79.09]},Indore:{c:[22.72,75.86]},Coimbatore:{c:[11.02,76.96]},Thiruvananthapuram:{c:[8.52,76.94]},Visakhapatnam:{c:[17.69,83.22]},Surat:{c:[21.17,72.83]},
+Jaipur:{c:[26.91,75.79],tag:"The Pink City, laid out on a grid in 1727",d:[2,3],best:[9,10,11,0,1,2],avoid:"May and June, when afternoons pass 40°C",t:[22,25,31,37,41,39,34,32,33,33,28,23],r:[5,8,8,5,12,55,200,230,80,15,3,3],s:[1200,3500,9000],
+pl:[["Amber Fort","3 h","₹100","Morning"],["Hawa Mahal","1 h","₹50","Morning"],["City Palace","2 h","₹200","Afternoon"],["Jantar Mantar","1 h","₹50","Afternoon"],["Nahargarh Fort for sunset","2 h","₹50","Evening"]],
+fd:[["Dal baati churma","Chokhi Dhani, Tonk Road","₹₹",1],["Pyaaz kachori","Rawat Mishthan Bhandar","₹",1],["Laal maas","Handi Restaurant, MI Road","₹₹",0],["Lassi in clay cups","Lassiwala, MI Road","₹",1]]},
+Agra:{c:[27.18,78.02],tag:"Home of the Taj Mahal and a Mughal capital",d:[1,2],best:[9,10,11,0,1,2],avoid:"May and June, plus the monsoon haze",nf:1,t:[20,24,31,37,41,40,35,33,34,34,28,22],r:[10,10,8,5,10,60,220,250,120,15,3,5],s:[1200,3500,10000],note:"Agra has no regular commercial flights. Fly to Delhi and take the Gatimaan Express (about 100 minutes).",
+pl:[["Taj Mahal at sunrise","3 h","₹250","Morning"],["Agra Fort","2 h","₹80","Afternoon"],["Itmad-ud-Daulah","1 h","₹30","Afternoon"],["Mehtab Bagh for the Taj at dusk","1 h","₹30","Evening"],["Fatehpur Sikri","3 h","₹50","Morning"]],
+fd:[["Petha","Panchhi Petha, Sadar Bazaar","₹",1],["Bedai and jalebi","Deviram Sweets","₹",1],["Mughlai curries","Pinch of Spice","₹₹",0],["Dalmoth snack","Any Sadar Bazaar shop","₹",1]]},
+Varanasi:{c:[25.32,83.01],tag:"One of the oldest living cities, on the Ganga",d:[2,3],best:[9,10,11,0,1,2],avoid:"May, June and the July to September floods",t:[23,27,34,40,43,40,34,33,33,33,29,24],r:[20,15,10,5,15,100,320,300,200,35,5,5],s:[1000,3000,8000],
+pl:[["Dawn boat ride along the ghats","2 h","₹400","Morning"],["Kashi Vishwanath Temple","2 h","Free","Morning"],["Sarnath","3 h","₹25","Afternoon"],["Assi Ghat","1 h","Free","Afternoon"],["Ganga Aarti at Dashashwamedh Ghat","1 h","Free","Evening"]],
+fd:[["Kachori and sabzi","Kachori Gali","₹",1],["Tamatar chaat","Deena Chaat Bhandar","₹",1],["Banarasi paan","Keshav Tambul Bhandar","₹",1],["Malaiyyo (winter only)","Godowlia lanes","₹",1]]},
+Udaipur:{c:[24.59,73.71],tag:"The city of lakes in southern Rajasthan",d:[2,3],best:[8,9,10,11,0,1,2],avoid:"May and June heat",t:[25,28,33,38,41,38,31,29,31,33,29,26],r:[5,5,5,3,10,70,260,250,110,15,5,3],s:[1500,4500,12000],
+pl:[["City Palace","2 h","₹300","Morning"],["Saheliyon ki Bari","1 h","₹50","Afternoon"],["Lake Pichola boat ride","1 h","₹400","Evening"],["Monsoon Palace at sunset","2 h","₹110","Evening"],["Jagdish Temple","1 h","Free","Morning"]],
+fd:[["Dal baati churma","Natraj Dining Hall","₹₹",1],["Mawa kachori","Old city sweet shops","₹",1],["Rajasthani thali","Ambrai, lakeside","₹₹₹",1],["Laal maas","Gangaur Ghat restaurants","₹₹",0]]},
+Goa:{c:[15.5,73.83],tag:"Beaches in the north, quieter coves and old churches elsewhere",d:[3,5],best:[10,11,0,1],avoid:"June to September, when many shacks close and the sea is rough",t:[32,32,33,33,33,30,29,29,30,32,33,33],r:[0,0,2,15,80,550,880,490,300,120,25,5],s:[1500,4000,10000],
+pl:[["Basilica of Bom Jesus, Old Goa","1 h","Free","Morning"],["Fontainhas Latin Quarter, Panaji","2 h","Free","Morning"],["Fort Aguada","1 h","Free","Afternoon"],["Palolem Beach, south Goa","3 h","Free","Afternoon"],["Sunset at Vagator or Chapora","2 h","Free","Evening"]],
+fd:[["Goan fish thali","Ritz Classic, Panaji","₹₹",0],["Pork vindaloo and sorpotel","Anthony's, Panaji","₹₹",0],["Bebinca dessert","Confeitaria 31 de Janeiro","₹",1],["Prawn recheado","Beach shacks in Anjuna","₹₹",0]]},
+Munnar:{c:[10.09,77.06],tag:"Tea country high in the Western Ghats",d:[2,3],best:[8,9,10,11,0,1,2],avoid:"June to August, when landslides can close roads",hill:1,ex:270,fx:240,note:"The nearest railhead is Aluva or Ernakulam, and the nearest airport is Kochi. About four hours of road remain from either.",t:[24,25,26,25,24,21,20,20,21,22,22,23],r:[20,25,50,150,220,500,650,400,250,300,180,60],s:[1500,3500,9000],
+pl:[["Eravikulam National Park","3 h","₹200","Morning"],["Tea Museum, Kanan Devan","1 h","₹125","Afternoon"],["Mattupetty Dam","1 h","₹20","Afternoon"],["Top Station viewpoint","2 h","Free","Morning"],["Attukad Waterfalls","1 h","Free","Evening"]],
+fd:[["Appam with vegetable stew","Saravana Bhavan, Munnar town","₹",1],["Kerala parotta and beef fry","Local toddy-shop style eateries","₹",0],["Tapioca and fish curry","Rapsy Restaurant","₹₹",0],["Fresh estate tea","Any tea estate cafe","₹",1]]},
+Leh:{c:[34.16,77.58],tag:"High-desert capital of Ladakh at 3,500 m",d:[5,7],best:[5,6,7,8],avoid:"December to February, when passes close and nights fall below −15°C",hill:1,nt:1,note:"No railway reaches Ladakh. The Manali road usually opens June to mid-October, and the Srinagar road from about May. Rest two days on arrival to acclimatise.",t:[-2,2,8,14,18,23,26,25,21,14,7,0],r:[8,8,10,8,8,5,15,15,10,5,3,5],s:[1500,3500,9000],
+pl:[["Leh Palace","1 h","₹30","Morning"],["Shanti Stupa for sunset","1 h","Free","Evening"],["Thiksey Monastery","2 h","₹30","Morning"],["Pangong Lake (long day trip, permit needed)","12 h","₹ permit","Morning"],["Nubra Valley via Khardung La","2 days","₹ permit","Morning"]],
+fd:[["Thukpa and momos","Tibetan Kitchen","₹₹",0],["Fresh bread and apricot cake","Gesmo Bakery","₹₹",1],["Butter tea and skyu","Home-stays in Leh","₹",1],["Cafe lunch","Lamayuru and Main Bazaar cafes","₹₹",0]]},
+Rishikesh:{c:[30.09,78.27],tag:"Yoga town and gateway to the Himalaya on the Ganga",d:[2,3],best:[1,2,3,8,9,10],avoid:"July and August, when rafting stops and roads are slow",hill:1,ex:60,fx:70,note:"The nearest railhead is Haridwar (about 40 minutes by road) and the nearest airport is Dehradun.",t:[20,23,28,34,37,36,31,30,31,31,27,22],r:[50,50,40,20,40,200,600,600,300,30,5,20],s:[900,2500,7000],
+pl:[["White-water rafting","3 h","₹600 and up","Morning"],["Laxman Jhula","1 h","Free","Afternoon"],["Triveni Ghat evening aarti","1 h","Free","Evening"],["Beatles Ashram","2 h","₹150","Afternoon"],["Neelkanth Mahadev Temple","3 h","Free","Morning"]],
+fd:[["Aloo puri breakfast","Chotiwala","₹",1],["Thali","Chotiwala","₹",1],["German bakery","Pumpernickel","₹₹",1],["Riverside cafe food","Little Buddha Cafe","₹₹",0]]},
+Darjeeling:{c:[27.04,88.26],tag:"Tea gardens and a view of Kangchenjunga",d:[3,4],best:[2,3,4,9,10],avoid:"June to September, when cloud hides the mountains",hill:1,ex:200,fx:210,note:"The nearest railhead is New Jalpaiguri and the nearest airport is Bagdogra. Both are about three hours from town by road.",t:[9,11,15,18,19,19,19,19,19,18,14,11],r:[20,30,50,110,200,600,780,640,450,130,15,10],s:[1200,3000,8000],
+pl:[["Tiger Hill sunrise","3 h","₹100 jeep share","Morning"],["Batasia Loop and Toy Train","2 h","₹20 / ₹1,500 ride","Morning"],["Happy Valley Tea Estate","2 h","Free","Afternoon"],["Himalayan Mountaineering Institute","2 h","₹100","Afternoon"],["Chowrasta Mall Road walk","1 h","Free","Evening"]],
+fd:[["Momos and thukpa","Hot Stimulating Cafe","₹",0],["Cakes and Darjeeling tea","Glenary's","₹₹",1],["Tibetan food","Kunga Restaurant","₹₹",0],["First-flush tea tasting","Nathmull's Tea Room","₹₹",1]]},
+Andaman:{c:[11.62,92.73],tag:"Island chain with clear water and old penal history",d:[4,6],best:[10,11,0,1,2,3],avoid:"June to September (rough seas, ferries get cancelled)",i:1,note:"There is no rail or road link. Ships from Chennai, Kolkata and Visakhapatnam take 50 to 60 hours.",t:[30,31,32,32,31,30,29,29,30,30,30,30],r:[30,15,20,60,350,480,400,420,430,300,230,120],s:[2000,5000,14000],
+pl:[["Cellular Jail and light show, Port Blair","2 h","₹30","Evening"],["Radhanagar Beach, Havelock","3 h","Free","Afternoon"],["Elephant Beach snorkelling","3 h","₹1,500","Morning"],["Ross Island","2 h","₹50","Morning"],["Bharatpur Beach, Neil Island","2 h","Free","Afternoon"]],
+fd:[["Grilled fresh fish","Anju Coco, Havelock","₹₹",0],["Seafood platter","New Lighthouse Restaurant, Port Blair","₹₹",0],["South Indian meals","Annapurna Cafe, Port Blair","₹",1],["Coconut water","Roadside stalls everywhere","₹",1]]}
+};
+const D=Object.keys(P).filter(k=>P[k].d);
+const $=s=>document.querySelector(s);
+const hm=m=>{m=Math.round(m/10)*10;return Math.floor(m/60)+'h'+(m%60?' '+m%60+'m':'')};
+const inr=n=>'₹'+(Math.round(n/100)*100).toLocaleString('en-IN');
+const find=v=>Object.keys(P).find(k=>k.toLowerCase()===v.trim().toLowerCase());
+const dist=(a,b)=>{const r=Math.PI/180,q=Math.sin((b[0]-a[0])*r/2)**2+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin((b[1]-a[1])*r/2)**2;return 12742*Math.asin(Math.sqrt(q))};
+const rng=a=>{const s=new Set(a),o=[];for(let i=0;i<12;i++)if(s.has(i)&&!s.has((i+11)%12)){let j=i;while(s.has((j+1)%12)&&(j+1)%12!==i)j=(j+1)%12;o.push(i==j?M[i]:M[i]+' to '+M[j])}return o.join(', ')};
+
+function modes(a,b){
+  const d=dist(a.c,b.c),f=b.hill?1.5:1.3,v=b.hill?.75:1,o=[];
+  if(!b.i){
+    o.push({n:'Car or taxi',m:d*f/(55*v)*60,lo:d*f*6,hi:d*f*9});
+    if(d<1100)o.push({n:'Bus',m:d*f/(45*v)*60,lo:d*f*1.3,hi:d*f*2.8});
+    if(!b.nt)o.push({n:'Train',m:d*1.2+(b.ex||0),lo:d*1.2*.6,hi:d*1.2*1.7});
+  }
+  if((d>=350||b.i)&&!b.nf)o.push({n:'Flight',m:d/750*60+170+(b.fx||0),lo:2500+d*2,hi:3500+d*4.5});
+  const fast=Math.min(...o.map(x=>x.m)),cheap=Math.min(...o.map(x=>x.lo));
+  o.forEach(x=>{x.fast=x.m===fast;x.cheap=x.lo===cheap});
+  return {d,o};
+}
+
+function chart(b){
+  const mx=Math.max(...b.r),W=600,x=i=>40+i*45;
+  let s=`<svg viewBox="0 0 600 200" role="img" aria-label="Monthly weather for the destination">`;
+  b.best.forEach(i=>s+=`<rect x="${x(i)-20}" y="6" width="40" height="164" fill="#2e7d5b" opacity=".14"/>`);
+  b.r.forEach((r,i)=>{const h=r/mx*55;s+=`<rect x="${x(i)-11}" y="${168-h}" width="22" height="${h}" fill="#7e9bb5"/>`});
+  const y=t=>16+(45-t)/50*130;
+  s+=`<polyline fill="none" stroke="#16202b" stroke-width="2" points="${b.t.map((t,i)=>x(i)+','+y(t)).join(' ')}"/>`;
+  b.t.forEach((t,i)=>s+=`<circle cx="${x(i)}" cy="${y(t)}" r="3" fill="#16202b"/><text x="${x(i)}" y="${y(t)-8}" text-anchor="middle">${t}°</text>`);
+  M.forEach((m,i)=>s+=`<text x="${x(i)}" y="190" text-anchor="middle">${m}</text>`);
+  return s+'</svg><p class="note">The line shows average daily high in °C. Blue bars show rainfall, up to '+mx+' mm in the wettest month. Shaded months are the best time to go.</p>';
+}
+
+function render(){
+  const f=find($('#from').value),t=$('#to').value,out=$('#out');
+  if(!f){out.innerHTML='<p class="empty">Start by typing a city in the first box. Every major Indian city is listed.</p>';return}
+  try{localStorage.setItem('payana-from',f)}catch(e){}
+  if(!t){
+    const rows=D.filter(k=>k!==f).map(k=>({k,...modes(P[f],P[k])})).sort((a,b)=>Math.min(...a.o.map(x=>x.m))-Math.min(...b.o.map(x=>x.m)));
+    out.innerHTML=`<h3 style="margin-top:0">Places to go from ${f}</h3><div class="list">${rows.map(r=>{const q=r.o.find(x=>x.fast);return `<button class="row" data-go="${r.k}"><b>${r.k}</b><span class="r">${hm(q.m)} by ${q.n.toLowerCase()}</span><span>${P[r.k].tag}</span><span class="r">${P[r.k].d[0]} to ${P[r.k].d[1]} days</span></button>`}).join('')}</div><p class="note">Sorted by the quickest way to get there. Select a place to see the full plan.</p>`;
+    out.querySelectorAll('[data-go]').forEach(e=>e.onclick=()=>{$('#to').value=e.dataset.go;setDays();render();scrollTo(0,0)});
+    return;
+  }
+  if(f===t){out.innerHTML='<p class="empty">You are already there. Choose a different destination.</p>';return}
+  const b=P[t],{d,o}=modes(P[f],b),n=Math.max(1,+$('#days').value||1),tier=+$('#tier').value;
+  const trans=o.filter(x=>x.n!=='Car or taxi').sort((a,b)=>a.lo-b.lo)[0]||o[0];
+  const tr=(trans.lo+trans.hi)/2*2,st=b.s[tier]*Math.max(n-1,0),fd=[500,1000,2200][tier]*n,ac=[300,700,1500][tier]*n,lt=[200,500,1200][tier]*n;
+  const parts=[['Travel, return',tr,'#16202b'],['Stay',st,'#2e7d5b'],['Food',fd,'#f4b81c'],['Local transport',lt,'#7e9bb5'],['Entry and activities',ac,'#b3261e']],sum=parts.reduce((a,p)=>a+p[1],0);
+  const pl=[...b.pl].sort((a,c)=>SLOT[a[3]]-SLOT[c[3]]);
+  let it='';
+  for(let i=0;i<n;i++){const day=pl.filter((_,j)=>j%n===i);it+=`<div class="day"><h4>Day ${i+1}</h4><div>${day.length?day.map(p=>`<p><b>${p[3]}:</b> ${p[0]} (${p[1]})</p>`).join(''):'<p>Free day. Walk the markets, eat well and rest.</p>'}</div></div>`}
+  out.innerHTML=`
+  <div class="board"><p class="from">From ${f}, ${Math.round(d)} km away</p><h2>${t}</h2><p>${b.tag}</p></div>
+  <div class="facts"><div><b>Days needed</b>${b.d[0]} at least, ${b.d[1]} to enjoy it</div><div><b>Best months</b>${rng(b.best)}</div><div><b>Avoid</b>${b.avoid}</div></div>
+
+  <h3>Getting there from ${f}</h3>
+  <div class="tw"><table><tr><th>Mode</th><th>Time, door to door</th><th>Fare, one way</th></tr>
+  ${o.map(x=>`<tr><td><b>${x.n}</b>${x.fast?'<span class="tag">Fastest</span>':''}${x.cheap?'<span class="tag">Cheapest</span>':''}</td><td>${hm(x.m)}</td><td>${inr(x.lo)} to ${inr(x.hi)}${x.n==='Car or taxi'?' per car':''}</td></tr>`).join('')}</table></div>
+  <p class="note">Flight times include about three hours for getting to the airport, check-in and the transfer at the end. Train fares run from sleeper class to 3AC.${b.note?' '+b.note:''}</p>
+
+  <h3>Weather through the year</h3>${chart(b)}
+
+  <h3>Places to visit</h3>
+  <div class="list">${b.pl.map(p=>`<div class="row"><b>${p[0]}</b><span class="r">${p[2]}</span><span>About ${p[1]}, best in the ${p[3].toLowerCase()}</span></div>`).join('')}</div>
+
+  <h3>What to eat, and where</h3>
+  <div class="list">${b.fd.map(p=>`<div class="row"><b><i class="v${p[3]?'':' n'}" title="${p[3]?'Vegetarian':'Non-vegetarian'}"></i>${p[0]}</b><span class="r">${p[2]}</span><span>${p[1]}</span></div>`).join('')}</div>
+
+  <h3>A ${n}-day plan</h3><div class="list">${it}</div>
+
+  <h3>Rough budget for one person</h3>
+  <div class="bar">${parts.map(p=>`<i style="width:${p[1]/sum*100}%;background:${p[2]}"></i>`).join('')}</div>
+  <div class="key">${parts.map(p=>`<span><s style="background:${p[2]}"></s>${p[0]} ${inr(p[1])}</span>`).join('')}</div>
+  <p class="total">${inr(sum)}</p>
+  <p class="note">Based on ${n} days, ${b.s[tier]?inr(b.s[tier]):''} a night for stay, and the cheapest of train, bus or flight each way. Change the days or the stay level at the top to update this.</p>`;
+}
+
+function setDays(){const t=$('#to').value;if(t)$('#days').value=P[t].d[1]}
+$('#cities').innerHTML=Object.keys(P).sort().map(k=>`<option value="${k}">`).join('');
+$('#to').innerHTML='<option value="">Show me ideas</option>'+D.map(k=>`<option>${k}</option>`).join('');
+$('#to').onchange=()=>{setDays();render()};
+['from','days','tier'].forEach(id=>$('#'+id).addEventListener('input',render));
+try{const s=localStorage.getItem('payana-from');if(s)$('#from').value=s}catch(e){}
+render();
+</script>
+</body>
+</html>
